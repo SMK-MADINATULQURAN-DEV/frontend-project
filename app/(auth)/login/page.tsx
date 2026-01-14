@@ -17,13 +17,50 @@ import {
 import { useRouter } from "next/navigation";
 import { Mail, Lock, ArrowRight, Chrome, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import * as Yup from "yup";
+import { useFormik, FormikProvider } from "formik";
+import { LoginPayload } from "./login.interface";
+import { useLogin } from "./login.service";
 
 function LoginPage() {
   const router = useRouter();
+  const mutation = useLogin()
   const [showPassword, setShowPassword] = useState(false);
 
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema: Yup.object({
+      email: Yup.string().email("Format wajib email @").required("Wajib diisi"),
+      password: Yup.string().required("Wajib diisi"),
+    }),
+    onSubmit: (values: LoginPayload) => {
+
+      // panggil mutation ketuka submit berhasil
+
+      mutation.mutate(values)
+      console.log("submit", values);
+    },
+    enableReinitialize: true,
+  });
+
+  {
+    console.log("validasi form", formik.errors);
+  }
+  {
+    console.log("isi form", formik.values);
+  }
+
   return (
-    <Box minH="100vh" bg="#F1F5F9" display="flex" alignItems="center" justifyContent="center">
+    <Box
+      minH="100vh"
+      bg="#F1F5F9"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+    >
       {/* Menggunakan maxW="600px" agar sama lebarnya dengan Register */}
       <Container width="600px" py={10} px={{ base: 4, md: 0 }}>
         <Box
@@ -83,133 +120,180 @@ function LoginPage() {
               </HStack>
 
               {/* Form Area */}
-              <VStack gap={6} align="stretch" w="full">
-                {/* Email Field */}
-                <Field.Root w="full"> {/* Tambahkan w="full" */}
-                  <Field.Label fontWeight="bold" color="blue.900" mb={2}>
-                    Email
-                  </Field.Label>
-                  <Box position="relative" w="full"> {/* Tambahkan w="full" */}
-                    <Flex
-                      position="absolute"
-                      left={5}
-                      top="50%"
-                      transform="translateY(-50%)"
-                      zIndex={10}
-                      color="blue.500"
+              <FormikProvider value={formik}>
+                <form onSubmit={formik.handleSubmit}>
+                  <VStack gap={6} align="stretch" w="full">
+                    {/* Email Field */}
+                    <Field.Root
+                      w="full"
+                      invalid={!!formik.errors.email && formik.touched.email}
                     >
-                      <Mail size={22} />
-                    </Flex>
-                    <Input
-                      w="full" // Tambahkan w="full"
-                      name="email"
-                      size="lg"
-                      placeholder="nama@email.com"
-                      h="16"
-                      pl={14}
-                      bg="blue.50/30"
-                      borderRadius="2xl"
-                      borderColor="blue.100"
-                      fontSize="md"
-                      _focus={{
-                        bg: "white",
-                        borderColor: "blue.500",
-                        ring: "3px",
-                        ringColor: "blue.50",
-                      }}
-                    />
-                  </Box>
-                </Field.Root>
+                      {" "}
+                      {/* Tambahkan w="full" */}
+                      <Field.Label fontWeight="bold" color="blue.900" mb={2}>
+                        Email
+                      </Field.Label>
+                      <Box position="relative" w="full">
+                        {" "}
+                        {/* Tambahkan w="full" */}
+                        <Flex
+                          position="absolute"
+                          left={5}
+                          top="50%"
+                          transform="translateY(-50%)"
+                          zIndex={10}
+                          color="blue.500"
+                        >
+                          <Mail size={22} />
+                        </Flex>
+                        <Input
+                          w="full" // Tambahkan w="full"
+                          name="email"
+                          size="lg"
+                          value={formik.values.email}
+                          onChange={(e) => {
+                            formik.setFieldValue("email", e.target.value);
+                          }}
+                          placeholder="nama@email.com"
+                          h="16"
+                          pl={14}
+                          bg="blue.50/30"
+                          color={"black"}
+                          borderRadius="2xl"
+                          fontSize="md"
+                          _focus={{
+                            bg: "white",
+                            borderColor: "blue.500",
+                            ring: "3px",
+                            ringColor: "blue.50",
+                          }}
+                        />
+                      </Box>
+                      {formik.errors.email && (
+                        <Text color={"red.500"} fontSize={"xs"}>
+                          {formik.errors.email}
+                        </Text>
+                      )}
+                    </Field.Root>
 
-                {/* Password Field */}
-                <Field.Root w="full"> {/* Tambahkan w="full" */}
-                  <Flex justify="space-between" align="center" mb={2} w="full">
-                    <Field.Label fontWeight="bold" color="blue.900" m={0}>
-                      Password
-                    </Field.Label>
-                    <Button
-                      variant="plain"
-                      size="sm"
-                      color="blue.600"
-                      fontWeight="black"
-                      p={0}
-                      h="auto"
-                      onClick={() => router.push("/forgot-password")}
-                      _hover={{ textDecoration: "underline" }}
+                    {/* Password Field */}
+                    <Field.Root
+                      w="full"
+                      invalid={
+                        !!formik.errors.password && formik.touched.password
+                      }
                     >
-                      Lupa Password?
-                    </Button>
-                  </Flex>
-                  <Box position="relative" w="full"> {/* Tambahkan w="full" */}
-                    <Flex
-                      position="absolute"
-                      left={5}
-                      top="50%"
-                      transform="translateY(-50%)"
-                      zIndex={10}
-                      color="blue.500"
-                    >
-                      <Lock size={22} />
-                    </Flex>
-
-                    <Input
-                      w="full" // Tambahkan w="full"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="••••••••"
-                      h="16"
-                      pl={14}
-                      pr={14}
-                      bg="blue.50/30"
-                      borderRadius="2xl"
-                      borderColor="blue.100"
-                      fontSize="md"
-                      _focus={{
-                        bg: "white",
-                        borderColor: "blue.500",
-                        ring: "3px",
-                        ringColor: "blue.50",
-                      }}
-                    />
-
-                    {/* Tombol Show/Hide Password */}
-                    <Box
-                      position="absolute"
-                      right={4}
-                      top="50%"
-                      transform="translateY(-50%)"
-                      zIndex={10}
-                    >
-                      <IconButton
-                        variant="ghost"
-                        color="blue.400"
-                        _hover={{ color: "blue.600", bg: "transparent" }}
-                        onClick={() => setShowPassword(!showPassword)}
+                      {" "}
+                      {/* Tambahkan w="full" */}
+                      <Flex
+                        justify="space-between"
+                        align="center"
+                        mb={2}
+                        w="full"
                       >
-                        {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
-                      </IconButton>
-                    </Box>
-                  </Box>
-                </Field.Root>
+                        <Field.Label fontWeight="bold" color="blue.900" m={0}>
+                          Password
+                        </Field.Label>
+                        <Button
+                          variant="plain"
+                          size="sm"
+                          color="blue.600"
+                          fontWeight="black"
+                          p={0}
+                          h="auto"
+                          onClick={() => router.push("/forgot-password")}
+                          _hover={{ textDecoration: "underline" }}
+                        >
+                          Lupa Password?
+                        </Button>
+                      </Flex>
+                      <Box position="relative" w="full">
+                        {" "}
+                        {/* Tambahkan w="full" */}
+                        <Flex
+                          position="absolute"
+                          left={5}
+                          top="50%"
+                          transform="translateY(-50%)"
+                          zIndex={10}
+                          color="blue.500"
+                        >
+                          <Lock size={22} />
+                        </Flex>
+                        <Input
+                          w="full" // Tambahkan w="full"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="••••••••"
+                          h="16"
+                          pl={14}
+                          pr={14}
+                          color={"black"}
+                          value={formik.values.password}
+                          onChange={(e) => {
+                            formik.setFieldValue("password", e.target.value);
+                          }}
+                          bg="blue.50/30"
+                          borderRadius="2xl"
+                          fontSize="md"
+                          _focus={{
+                            bg: "white",
+                            borderColor: "blue.500",
+                            ring: "3px",
+                            ringColor: "blue.50",
+                          }}
+                        />
+                        {/* Tombol Show/Hide Password */}
+                        <Box
+                          position="absolute"
+                          right={4}
+                          top="50%"
+                          transform="translateY(-50%)"
+                          zIndex={10}
+                        >
+                          <IconButton
+                            variant="ghost"
+                            color="blue.400"
+                            _hover={{ color: "blue.600", bg: "transparent" }}
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            {showPassword ? (
+                              <EyeOff size={22} />
+                            ) : (
+                              <Eye size={22} />
+                            )}
+                          </IconButton>
+                        </Box>
+                      </Box>
+                      {formik.errors.password && (
+                        <Text color={"red.500"} fontSize={"xs"}>
+                          {formik.errors.password}
+                        </Text>
+                      )}
+                    </Field.Root>
 
-                <Button
-                  bg="blue.600"
-                  color="white"
-                  h="16"
-                  w="full" // Tambahkan w="full"
-                  borderRadius="2xl"
-                  fontWeight="black"
-                  fontSize="lg"
-                  mt={4}
-                  _hover={{
-                    bg: "blue.700",
-                    shadow: "2xl",
-                    transform: "translateY(-2px)",
-                  }}
-                  gap={3}
-                >
-                  Masuk Sekarang <ArrowRight size={24} />
-                </Button>
-              </VStack>
+                    <Button
+                      bg="blue.600"
+                      color="white"
+                      type="submit"
+                      h="16"
+                      w="full" // Tambahkan w="full"
+                      borderRadius="2xl"
+                      fontWeight="black"
+                      fontSize="lg"
+                      loading={mutation.isPending}
+                      mt={4}
+                      _hover={{
+                        bg: "blue.700",
+                        shadow: "2xl",
+                        transform: "translateY(-2px)",
+                      }}
+                      gap={3}
+                    >
+                      Masuk Sekarang <ArrowRight size={24} />
+                    </Button>
+                  </VStack>
+                </form>
+              </FormikProvider>
             </VStack>
 
             <Box textAlign="center">

@@ -1,8 +1,11 @@
-import axios from 'axios';
-import Cookies from 'js-cookie';
+import axios from "axios";
+import Cookies from "js-cookie";
 
 export const api = axios.create({
-  baseURL: 'http://localhost:3000', // URL Backend NestJS
+  baseURL: "http://localhost:8700", // URL Backend NestJS
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
 // Interceptor untuk menyisipkan token di setiap request
@@ -13,3 +16,10 @@ export const api = axios.create({
 //   }
 //   return config;
 // });
+
+
+export interface BaseResponse {
+  message: string;
+  
+}
+
