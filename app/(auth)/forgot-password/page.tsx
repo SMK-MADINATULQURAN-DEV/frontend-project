@@ -11,20 +11,29 @@ import {
   Field,
   Container,
   Flex,
-  IconButton,
 } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import { Mail, ArrowRight, ArrowLeft, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import ResetPassword from "./reset-password";
+import { useLupaPassword, useResetPassword } from "./forgot-password.service";
 
 function ForgotPasswordPage() {
   const router = useRouter();
   const [isSubmitted, setIsSubmitted] = useState(false);
+ 
   const [email, setEmail] = useState<string>("");
+  const mutation = useLupaPassword();
+
 
   return (
-    <Box minH="100vh" bg="#F1F5F9" display="flex" alignItems="center" justifyContent="center">
+    <Box
+      minH="100vh"
+      bg="#F1F5F9"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+    >
       <Container width="600px" py={10} px={{ base: 4, md: 0 }}>
         <Box
           bg="white"
@@ -49,7 +58,8 @@ function ForgotPasswordPage() {
                   Jangan khawatir, kami akan membantu.
                 </Text>
                 <Text color="blue.400" fontWeight="medium">
-                  Masukkan email yang terdaftar untuk menerima instruksi pemulihan akun.
+                  Masukkan email yang terdaftar untuk menerima instruksi
+                  pemulihan akun.
                 </Text>
               </VStack>
 
@@ -73,8 +83,12 @@ function ForgotPasswordPage() {
                     <Input
                       w="full"
                       type="email"
+                        color={"black"}
                       placeholder="nama@email.com"
                       h="16"
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                      }}
                       pl={14}
                       bg="blue.50/30"
                       borderRadius="2xl"
@@ -99,7 +113,14 @@ function ForgotPasswordPage() {
                   fontWeight="black"
                   fontSize="lg"
                   mt={4}
-                  onClick={() => setIsSubmitted(true)}
+                  loading={mutation.isPending}
+                  onClick={() => {
+                    mutation.mutate({ email: email }, {
+                      onSuccess : () => {
+                        setIsSubmitted(true)
+                      }
+                    });
+                  }}
                   _hover={{
                     bg: "blue.700",
                     shadow: "2xl",
@@ -113,10 +134,10 @@ function ForgotPasswordPage() {
 
               {/* Back to Login */}
               <HStack justify="center" pt={4}>
-                <Button 
-                  variant="ghost" 
-                  color="blue.600" 
-                  fontWeight="bold" 
+                <Button
+                  variant="ghost"
+                  color="blue.600"
+                  fontWeight="bold"
                   gap={2}
                   onClick={() => router.push("/login")}
                 >
@@ -126,7 +147,7 @@ function ForgotPasswordPage() {
             </VStack>
           ) : (
             /* --- TAMPILAN SETELAH KIRIM (UX SUCCESS) --- */
-            <ResetPassword email={email}/>
+            <ResetPassword email={email} />
           )}
         </Box>
       </Container>
@@ -134,4 +155,6 @@ function ForgotPasswordPage() {
   );
 }
 
-export default dynamic(() => Promise.resolve(ForgotPasswordPage), { ssr: false });
+export default dynamic(() => Promise.resolve(ForgotPasswordPage), {
+  ssr: false,
+});

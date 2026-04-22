@@ -9,14 +9,15 @@ import {
   Flex,
   Portal,
   IconButton,
+  Spinner,
   Image,
 } from "@chakra-ui/react";
+import { Image as ImageIcon, Trash2, X } from "lucide-react";
 import { useFormik } from "formik";
-import { Image as ImageIcon, X, Globe, Trash2 } from "lucide-react";
 import * as Yup from "yup";
-import { useCreatePost } from "./post/post.service";
 import { useRef } from "react";
-import { useUpload } from "@/hook/useUpload";
+import { useUpload } from "@/hook/useUpload"; // Sesuaikan path hook Anda
+import { useCreatePost } from "./post/post.service";
 
 export function CreatePostModal({
   isOpen,
@@ -26,10 +27,8 @@ export function CreatePostModal({
   onClose: () => void;
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
-
-  const mutation = useCreatePost();
   const { upload, isUploading } = useUpload();
+  const mutation = useCreatePost()
 
   const formik = useFormik({
     initialValues: {
@@ -44,40 +43,38 @@ export function CreatePostModal({
       console.log("Payload siap kirim ke Backend:", values);
 
       mutation.mutate(values, {
-        onSuccess: () => {
-          onClose(); // Tutup modal hanya jika berhasil
-          formik.resetForm();
-        },
-      });
+      onSuccess: () => {
+        onClose(); // Tutup modal hanya jika berhasil
+        formik.resetForm();
+      }
+    });
     },
   });
-
-
 
   // Fungsi untuk menangani pemilihan file
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
- 
+
     try {
       // 1. Upload file ke Cloudinary/Server via Hook
       const url = await upload(file);
- 
+
       // 2. Simpan URL hasil upload ke state Formik
       const newMedia = {
         url: url,
         type: file.type.startsWith("video") ? "video" : ("image" as const),
       };
- 
+
       formik.setFieldValue("medias", [...formik.values.medias, newMedia]);
- 
+
       // Reset input file agar bisa pilih file yang sama lagi jika perlu
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (err) {
       console.error("Gagal upload:", err);
     }
   };
- 
+
   const removeMedia = (index: number) => {
     const updated = formik.values.medias.filter((_, i) => i !== index);
     formik.setFieldValue("medias", updated);
@@ -87,7 +84,6 @@ export function CreatePostModal({
 
   return (
     <Portal>
-      {/* Overlay Gelap */}
       <Box
         position="fixed"
         inset={0}
@@ -98,16 +94,14 @@ export function CreatePostModal({
         justifyContent="center"
         onClick={onClose}
       >
-        {/* Konten Modal */}
         <Box
           bg="white"
           w="full"
           maxW="lg"
           borderRadius="2xl"
           shadow="2xl"
-          onClick={(e) => e.stopPropagation()} // Agar tidak close saat klik dalam kotak
+          onClick={(e) => e.stopPropagation()}
         >
-          {/* Header Modal */}
           <Flex
             justify="space-between"
             align="center"
@@ -121,50 +115,30 @@ export function CreatePostModal({
             <Text fontWeight="black" color="blue.900">
               Buat Postingan Baru
             </Text>
-            <Box w="40px" /> {/* Spacer untuk keseimbangan */}
+            <Box w="40px" />
           </Flex>
 
-          {/* Body Modal */}
           <VStack p={5} align="stretch" gap={4}>
-            <HStack gap={3}>
-              <Box w="45px" h="45px" bg="blue.600" borderRadius="full" />
-              <VStack align="start" gap={0}>
-                <Text fontWeight="bold" color="blue.900">
-                  Ahmad Zaki
-                </Text>
-                <HStack gap={1} color="blue.600">
-                  <Globe size={12} />
-                  <Text fontSize="xs" fontWeight="bold">
-                    Publik
-                  </Text>
-                </HStack>
-              </VStack>
-            </HStack>
+            <Textarea
+              name="content"
+              color={"black"}
+              value={formik.values.content}
+              onChange={formik.handleChange}
+              placeholder="Apa yang Anda pikirkan?"
+              size="lg"
+              minH="120px"
+              fontSize="xl"
+              resize="none"
+              autoFocus
+            />
 
-         
+            {/* Hidden Input File */}
             <input
               type="file"
               hidden
-              id="file-upload"
               ref={fileInputRef}
               onChange={handleFileChange}
               accept="image/*,video/*"
-            />
-
-            <Textarea
-              placeholder="Apa yang Anda pikirkan?"
-              value={formik.values.content}
-              onChange={(e) => {
-                formik.setFieldValue("content", e.target.value);
-              }}
-              size="lg"
-              minH="150px"
-              fontSize="xl"
-              color="blue.900"
-              fontWeight="medium"
-              _placeholder={{ color: "blue.200" }}
-              resize="none"
-              autoFocus
             />
 
             {/* Preview Media */}
@@ -205,33 +179,30 @@ export function CreatePostModal({
               </HStack>
             )}
 
-            {/* Media Preview Placeholder (Opsional) */}
+            {/* Tombol Trigger Upload */}
             <Box
               border="2px dashed"
-              borderColor="blue.50"
+              borderColor="blue.100"
               borderRadius="xl"
-              p={8}
+              p={6}
               textAlign="center"
-               cursor={isUploading ? "not-allowed" : "pointer"}
+              cursor={isUploading ? "not-allowed" : "pointer"}
               _hover={!isUploading ? { bg: "blue.50" } : {}}
               onClick={() => !isUploading && fileInputRef.current?.click()}
-              
             >
               <VStack gap={1}>
-                <ImageIcon size={30} color="#2563eb" />
-                <Text
-                  fontSize="sm"
-                
-                  color="blue.800"
-                  fontWeight="bold"
-                >
-                  Tambah Foto/Video
+                {isUploading ? (
+                  <Spinner color="blue.500" />
+                ) : (
+                  <ImageIcon size={24} color="#2563eb" />
+                )}
+                <Text fontSize="xs" color="blue.800" fontWeight="bold">
+                  {isUploading ? "Sedang Mengunggah..." : "Tambah Foto/Video"}
                 </Text>
               </VStack>
             </Box>
           </VStack>
 
-          {/* Footer Modal */}
           <Flex p={4} borderTop="1px solid" borderColor="blue.50" justify="end">
             <Button
               bg="blue.600"
@@ -241,7 +212,7 @@ export function CreatePostModal({
               fontWeight="bold"
               loading={mutation.isPending}
               onClick={() => formik.handleSubmit()}
-              disabled={!formik.values.content || mutation.isPending}
+              disabled={!formik.values.content || isUploading || mutation.isPending}
             >
               Kirim Postingan
             </Button>

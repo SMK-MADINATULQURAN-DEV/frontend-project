@@ -17,6 +17,7 @@ export const useLogin = () => {
       console.log("kalau sucess ngapain", res);
       Cookies.set("access_token", res.access_token);
       Cookies.set("refresh_token", res.refresh_token);
+       Cookies.set("uuid", res.user.id);
 
       Swal.fire({
         title: "Login Berhasil",

@@ -27,6 +27,24 @@ function LoginPage() {
   const mutation = useLogin()
   const [showPassword, setShowPassword] = useState(false);
 
+  const handleGoogleLogin = () => {
+    const rootUrl = "https://accounts.google.com/o/oauth2/v2/auth";
+    const options = {
+      redirect_uri: process.env.NEXT_PUBLIC_REDIRECT_URL_GOOGLE!,
+      client_id: process.env.NEXT_PUBLIC_CLIENT_ID!,
+      access_type: "offline",
+      response_type: "code",
+      prompt: "consent",
+      scope: [
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/userinfo.email",
+      ].join(" "),
+    };
+
+    const qs = new URLSearchParams(options).toString();
+    window.location.assign(`${rootUrl}?${qs}`);
+  };
+
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -61,6 +79,11 @@ function LoginPage() {
       alignItems="center"
       justifyContent="center"
     >
+
+      <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: '12px', margin: '20px 0' }}>
+     
+
+    </div>
       {/* Menggunakan maxW="600px" agar sama lebarnya dengan Register */}
       <Container width="600px" py={10} px={{ base: 4, md: 0 }}>
         <Box
@@ -99,6 +122,7 @@ function LoginPage() {
                 h="16"
                 w="full" // Pastikan tombol Google melebar penuh
                 borderRadius="2xl"
+                onClick={handleGoogleLogin}
                 borderColor="gray.200"
                 bg="white"
                 _hover={{ bg: "gray.50", borderColor: "blue.200" }}
