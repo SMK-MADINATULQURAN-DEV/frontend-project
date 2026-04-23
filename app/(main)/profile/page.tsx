@@ -18,7 +18,6 @@ import {
   Link as LinkIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useProfile } from "./profile.service";
 import { useGetMyPost } from "../post/post.service";
 import { PostCard } from "../post/PostCard";
 
@@ -43,12 +42,9 @@ const USER_POSTS = [
 
 function ProfilePage() {
   const router = useRouter();
-  const { data } = useProfile();
-
   const { data: posting, query, setQuery, isFetching } = useGetMyPost();
 
-  console.log("posting", posting);
-
+  console.log("Data postingan saya:", posting);
   return (
     <VStack flex={1} gap={6} align="stretch">
       {/* --- PROFILE HEADER CARD --- */}
@@ -79,15 +75,7 @@ function ProfilePage() {
               borderColor="white"
               overflow="hidden"
             >
-              {/* <Box w="full" h="full" bg="blue.200" /> Placeholder Image */}
-
-              <Image
-                src={data?.data?.avatar} // Ganti dengan variable URL foto dari DB
-                alt="Profile Picture"
-                w="full"
-                h="full"
-                objectFit="cover"
-              />
+              <Box w="full" h="full" bg="blue.200" /> {/* Placeholder Image */}
             </Box>
             <Button
               onClick={() => router.push("/profile/edit")}
@@ -100,11 +88,11 @@ function ProfilePage() {
           </Flex>
 
           <VStack align="start" gap={1} mt={4}>
-            <Heading size="xl" fontWeight="black" color={"gray.600"}>
-              {data?.data?.name}
+            <Heading size="xl" fontWeight="black">
+              Ahmad Zaki
             </Heading>
             <Text color="gray.500" fontSize="md">
-              {data?.data?.username}
+              @zaki_dev
             </Text>
           </VStack>
 
@@ -119,7 +107,7 @@ function ProfilePage() {
             </HStack>
             <HStack gap={1}>
               <LinkIcon size={16} />{" "}
-              <Text color="blue.600">{data?.data?.email}</Text>
+              <Text color="blue.600">github.com/zaki</Text>
             </HStack>
             <HStack gap={1}>
               <Calendar size={16} /> Bergabung Januari 2026
@@ -155,17 +143,15 @@ function ProfilePage() {
       {/* --- USER POSTS LIST --- */}
       <VStack gap={4} align="stretch">
         {isFetching ? (
-          // Tampilkan loading sederhana saat fetch data baru
           <Text textAlign="center" color="gray.500" py={10}>
             Memuat postingan...
           </Text>
         ) : (
+          posting &&
           posting?.data?.map((post) => <PostCard key={post.id} post={post} />)
         )}
-      </VStack>
 
-      {/* Jika data kosong */}
-      {!isFetching && posting?.data?.length === 0 && (
+        {!isFetching && posting?.data?.length === 0 && (
         <Box textAlign="center" py={10}>
           <Text color="gray.500">Belum ada postingan.</Text>
         </Box>
@@ -182,13 +168,13 @@ function ProfilePage() {
         >
           Sebelumnya
         </Button>
-
+ 
         <Box bg="blue.50" px={4} py={2} borderRadius="lg">
           <Text fontWeight="bold" color="blue.600">
             Halaman {query.page}
           </Text>
         </Box>
-
+ 
         <Button
           variant="outline"
           colorPalette="blue"
@@ -203,6 +189,7 @@ function ProfilePage() {
           Berikutnya
         </Button>
       </HStack>
+      </VStack>
     </VStack>
   );
 }

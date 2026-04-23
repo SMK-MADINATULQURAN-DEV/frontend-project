@@ -1,4 +1,5 @@
 import { BaseResponse } from "@/app/lib/axios";
+import { CommentResponse } from "../comment/comment.interface";
 
 export interface PostPayload {
   content: string;
@@ -7,6 +8,8 @@ export interface PostPayload {
     type?: string;
   }[];
 }
+
+
 
 export interface PostResponseSingle {
   id: string;
@@ -21,7 +24,7 @@ export interface PostResponseSingle {
     id: string;
   }[];
   likes: [];
-  comments: [];
+  comments: CommentResponse[];
   commentsCount: number;
 }
 export interface PostResponse extends BaseResponse {

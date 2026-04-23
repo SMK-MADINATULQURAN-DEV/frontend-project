@@ -1,7 +1,9 @@
 "use client";
 import { Box, VStack, HStack, Text, Image, Flex } from "@chakra-ui/react";
 import { Heart, MessageCircle } from "lucide-react";
-import { MyPostResponse, PostResponseSingle } from "./post.interface";
+import { PostResponseSingle } from "./post.interface";
+import { PostComments } from "../comment/PostCommets";
+import { useState } from "react";
 
 interface PostCardProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -9,6 +11,8 @@ interface PostCardProps {
 }
 
 export const PostCard = ({ post }: PostCardProps) => {
+
+  const [showComments, setShowComments] = useState(false);
   return (
     <Box
       bg="white"
@@ -109,12 +113,25 @@ export const PostCard = ({ post }: PostCardProps) => {
             <Heart size={20} />
             <Text fontSize="sm">{post.likes?.length || 0}</Text>
           </HStack>
-          <HStack gap={2} color="gray.600">
+          <HStack gap={2} color="gray.600" onClick={() => setShowComments(!showComments)}>
             <MessageCircle size={20} />
+            
             <Text fontSize="sm">{post.comments?.length || 0}</Text>
           </HStack>
         </HStack>
       </Box>
+
+
+      {showComments && (
+  <PostComments 
+    comments={post.comments} 
+    postId={post.id} 
+    onCommentSubmit={(content, id) => {
+      console.log("Kirim ke API:", content, "untuk post:", id);
+      // Panggil fungsi service kamu di sini
+    }} 
+  />
+)}
     </Box>
   );
 };

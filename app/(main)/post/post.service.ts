@@ -19,7 +19,7 @@ export const useCreatePost = () => {
       // Invalidate cache agar list postingan di timeline langsung terbaru
       // Pastikan queryKey ini sama dengan yang digunakan di hook getPosts
       queryClient.invalidateQueries({ queryKey: ["/posts"] });
-      queryClient.invalidateQueries({ queryKey: ["/posts/my"] });
+      queryClient.invalidateQueries({ queryKey: ["/posts/my-posts"] });
 
       Swal.fire({
         title: "Berhasil",
@@ -71,5 +71,38 @@ export const useGetMyPost = () => {
 
   return { data, isFetching, isLoading, query, setQuery };
 }; 
+
+
+
+//
+
+const getMyFeed = async (
+  params : {
+    page : number
+    limit :number
+  },
+): Promise<MyPostResponse> => {
+
+  console.log("params", params)
+  
+  return api.get("/posts/random", {params}).then((n) => n.data);
+};
+
+
+
+export const useGetMyFeed = () => {
+
+  const [query, setQuery] = useState({
+    page :1,
+    limit : 10
+  })
+  const { data, isFetching, isLoading } = useQuery({
+    queryFn: () => getMyFeed(query),
+    queryKey: ["/posts/randoms"],
+    staleTime: 1000 * 60 * 60,
+  });
+
+  return { data, isFetching, isLoading, query, setQuery };
+};
 
 
